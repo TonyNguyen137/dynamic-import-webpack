@@ -1,7 +1,7 @@
 import "./src/scss/style.scss";
 import { dynamicImportScriptsOnClick } from "./src/js/utils";
 
-// desired Solution
+// desired Solutionn
 dynamicImportScriptsOnClick([
   {
     triggerSelector: ".accordion",
