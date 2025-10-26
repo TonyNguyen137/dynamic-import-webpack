@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    body {
+      padding-bottom: 200px;
+    }
+  </style>
+  <body class="container">
+    <header class="header py-3 bg-success">
+      <!-- Navigation Component -->
+      <nav class="navbar bg-white navbar--expand-lg">
+        <div class="container navbar__container">
+          <a href="/" aria-label="homepage" class="navbar__link"> LOGO </a>
+          <button
+            class="navbar__btn-open"
+            aria-expanded="false"
+            aria-controls="offcanvas"
+            aria-label="open menu"
+          >
+            open
+          </button>
+          <div
+            class="navbar__offcanvas"
+            tabindex="-1"
+            id="offcanvas"
+            aria-label=""
+            aria-modal="true"
+            role="dialog"
+          >
+            <div class="navbar__offcanvas-header">
+              <button class="navbar__btn-close" aria-label="close">
+                close
+              </button>
+            </div>
+            <div class="navbar__offcanvas-body">
+              <ul class="navbar__list">
+                <li class="navbar__item">
+                  <a href="#" class="navbar__link"> Home </a>
+                </li>
+
+                <li class="navbar__item">
+                  <a href="#" class="navbar__link"> About Us </a>
+                </li>
+
+                <li class="navbar__item">
+                  <a href="#" class="navbar__link"> Pricing </a>
+                </li>
+              </ul>
+              <form action="">
+                <input type="search" name="" id="" />
+              </form>
+              <button>search</button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Accordion Component-->
+    <div class="container my-20">
+      <div class="accordion">
+        <div class="accordion__item">
+          <h3 class="accordion__header">
+            <button
+              class="accordion__toggler"
+              aria-expanded="true"
+              aria-controls="collapse-1"
+            >
+              Accordion Header 1
+            </button>
+          </h3>
+
+          <div id="collapse-1" class="accordion__collapse show">
+            <div class="accordion__body">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum
+              fugiat, animi cum laborum iste assumenda ipsam adipisci
+              consequatur asperiores excepturi, accusantium ut molestias aliquam
+              exercitationem. Natus mollitia placeat labore illum.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion__item">
+          <h3 class="accordion__header">
+            <button
+              class="accordion__toggler"
+              aria-expanded="false"
+              aria-controls="collapse-2"
+            >
+              Accordion Header 2
+            </button>
+          </h3>
+
+          <div id="collapse-2" class="accordion__collapse collapse">
+            <div class="accordion__body">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum
+              fugiat, animi cum laborum iste assumenda ipsam adipisci
+              consequatur asperiores excepturi, accusantium ut molestias aliquam
+              exercitationem.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion__item">
+          <h3 class="accordion__header">
+            <button
+              class="accordion__toggler"
+              aria-expanded="false"
+              aria-controls="collapse-3"
+            >
+              Accordion Header 3
+            </button>
+          </h3>
+
+          <div id="collapse-3" class="accordion__collapse collapse">
+            <div class="accordion__body">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum
+              fugiat, animi cum laborum iste assumenda ipsam adipisci
+              consequatur asperiores excepturi, accusantium ut molestias aliquam
+              exercitationem. Natus mollitia placeat labore illum.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabbar Component -->
+    <div class="container my-20">
+      <div class="tabs">
+        <div class="tabs__list" role="tablist">
+          <button
+            class="tabs__tab"
+            type="button"
+            id="tab-1"
+            role="tab"
+            aria-selected="true"
+            aria-controls="tabpanel-1"
+          >
+            Tab 1
+          </button>
+          <button
+            class="tabs__tab"
+            type="button"
+            id="tab-2"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tabpanel-2"
+            tabindex="-1"
+          >
+            Tab 2
+          </button>
+          <button
+            class="tabs__tab"
+            type="button"
+            id="tab-3"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tabpanel-3"
+            tabindex="-1"
+          >
+            Tab 3
+          </button>
+          <button
+            class="tabs__tab"
+            type="button"
+            id="tab-4"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tabpanel-4"
+            tabindex="-1"
+          >
+            Tab 4
+          </button>
+        </div>
+        <div class="tabs__wrapper-panels">
+          <section
+            class="tabs__panel"
+            id="tabpanel-1"
+            role="tabpanel"
+            aria-hidden="false"
+            aria-labelledby="tab-1"
+            tabindex="0"
+          >
+            <h2>Content heading 1</h2>
+            <p>
+              Copy with an <a href="#">Example focusable link</a> as content for
+              A1.
+            </p>
+          </section>
+
+          <section
+            class="tabs__panel"
+            id="tabpanel-2"
+            role="tabpanel"
+            aria-hidden="true"
+            aria-labelledby="tab-2"
+            tabindex="0"
+          >
+            <h2>Content heading 2</h2>
+            <p>
+              Copy with an <a href="#">Example focusable link</a> as content for
+              B1.
+            </p>
+          </section>
+
+          <section
+            class="tabs__panel"
+            id="tabpanel-3"
+            role="tabpanel"
+            aria-hidden="true"
+            aria-labelledby="tab-3"
+            tabindex="0"
+          >
+            <h2>Content heading 3</h2>
+            <p>
+              Copy without a focusable link as content for HEADING 3. Lorem
+              ipsum dolor sit amet consectetur adipisicing elit. Rerum, enim
+              sunt eos fugit harum autem reprehenderit qui atque ut perferendis
+              culpa eius nobis adipisci corporis suscipit quae, dolorum nemo.
+              Nihil!
+            </p>
+
+            <div>
+              <div class="tabs__list" role="tablist">
+                <button
+                  class="tabs__tab"
+                  type="button"
+                  id="tab-1-1"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="tabpanel-1-1"
+                >
+                  Tab 1
+                </button>
+                <button
+                  class="tabs__tab"
+                  type="button"
+                  id="tab-1-2"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="tabpanel-2-1"
+                  tabindex="-1"
+                >
+                  Tab 2
+                </button>
+              </div>
+              <section
+                class="tabs__panel"
+                id="tabpanel-1-1"
+                role="tabpanel"
+                aria-hidden="false"
+                aria-labelledby="tab-1-1"
+                tabindex="0"
+              >
+                <h2>Content heading D</h2>
+                <p>
+                  Copy with an <a href="#">Example focusable link</a> as content
+                  for A1.
+                </p>
+              </section>
+
+              <section
+                class="tabs__panel"
+                id="tabpanel-1-2"
+                role="tabpanel"
+                aria-hidden="true"
+                aria-labelledby="tab-1-2"
+                tabindex="0"
+              >
+                <h2>Content heading E</h2>
+                <p>
+                  Copy with an <a href="#">Example focusable link</a> as content
+                  for B1.
+                </p>
+              </section>
+            </div>
+          </section>
+
+          <section
+            class="tabs__panel"
+            id="tabpanel-4"
+            role="tabpanel"
+            aria-hidden="true"
+            aria-labelledby="tab-4"
+            tabindex="0"
+          >
+            <h2>Content heading 4</h2>
+            <p>
+              Copy with an <a href="#">Example focusable link</a> as content for
+              A1. Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Veniam, fuga architecto? Iste dignissimos, tempora illum
+              repudiandae harum accusamus est ipsa velit libero quisquam
+              molestias debitis vero accusantium. Unde, temporibus recusandae?
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
