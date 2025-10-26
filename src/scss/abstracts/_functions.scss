@@ -1,0 +1,548 @@
+/* 
+This file contains some SCSS functions sourced from the Bootstrap framework.
+Source: https://github.com/twbs/bootstrap/blob/main/scss/_functions.scss
+These functions are used in accordance with Bootstrap's open-source license (MIT).
+Modifications may have been made to the original functions.
+*/
+@use 'sass:math';
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:color';
+@use 'sass:string';
+@use 'sass:list';
+@use 'variables' as *;
+
+@function to-rem($value, $precision: 3) {
+  @return px-to-rem($value, $precision);
+}
+
+@function px-to-rem($value, $precision: 3) {
+  $base-font-size: 16;
+  $_value: if(math.is-unitless($value), $value, strip-unit($value));
+
+  @return round-to(math.div($_value, $base-font-size), $precision) * 1rem;
+}
+
+@function strip-unit($value) {
+  @return math.div($value, $value * 0 + 1);
+}
+
+@function px-to-em($value, $precision: 3) {
+  $base-font-size: 16;
+  $_value: if(math.is-unitless($value), $value, strip-unit($value));
+
+  @return round-to(math.div($_value, $base-font-size), $precision) * 1em;
+}
+
+@function round-to($number, $precision: 4) {
+  $factor: math.pow(10, $precision);
+
+  @return math.div(math.round($number * $factor), $factor);
+}
+
+@function apply-unit($value, $unit) {
+  @return #{$value}#{$unit}; // Ensures no space
+}
+
+@function fluid(
+  $min-size,
+  $max-size,
+  $min-viewport,
+  $max-viewport,
+  $threshold-unit: 'rem',
+  $preffered-unit: 'rem',
+  $relative-to: 'viewport'
+) {
+  $relative-to: $relative-to;
+  $threshold-unit: $threshold-unit;
+  $preferred-unit: $preffered-unit;
+  $min-size: $min-size;
+  $max-size: $max-size;
+
+  // @debug min-vp meta.type-of($min-viewport);
+  // @debug max-vp meta.type-of($max-viewport);
+
+  $min-viewport: normalize-breakpoint($min-viewport, 'min-viewport');
+  $max-viewport: normalize-breakpoint($max-viewport, 'max-viewport');
+
+  // @debug minvp $min-viewport;
+  // @debug maxvp $max-viewport;
+
+  $delta-size: $max-size - $min-size;
+  $delta-viewport: $max-viewport - $min-viewport;
+  $change: round-to(math.div($delta-size, $delta-viewport), 6);
+  $preferred: if(
+    $preferred-unit == 'rem',
+    round-to(math.div($max-size - ($max-viewport * $change), 16) * 1rem, 4),
+    round-to($max-size - ($max-viewport * $change), 4) * 1px
+  );
+  $rate-of-change: null;
+
+  @if $relative-to == 'viewport' {
+    $rate-of-change: math.abs(round-to(100vw * $change));
+  } @else if $relative-to == 'container' {
+    $rate-of-change: math.abs(round-to(100cqi * $change));
+  } @else {
+    @error 'Invalid value for $relative-to. Expected "viewport" or "container".';
+  }
+
+  $min-size: if($threshold-unit == 'rem', px-to-rem($min-size), $min-size * 1px);
+  $max-size: if($threshold-unit == 'rem', px-to-rem($max-size), $max-size * 1px);
+  $should-swap: $min-size > $max-size;
+
+  @if $should-swap {
+    $temp: $min-size;
+    $min-size: $max-size;
+    $max-size: $temp;
+  }
+
+  $preferred-value: calc(#{$preferred} #{if($should-swap, '-', '+')} #{$rate-of-change});
+
+  @return clamp(#{$min-size}, #{$preferred-value}, #{$max-size});
+}
+
+@function fluid-px($min-size, $max-size, $min-viewport, $max-viewport, $relative-to: 'viewport') {
+  @return fluid($min-size, $max-size, $min-viewport, $max-viewport, 'px', 'rem' $relative-to);
+}
+
+@function normalize-breakpoint($value, $name) {
+  // @debug value $value;
+  // @debug name $name;
+  // @debug map.has-key($grid-breakpoints, $value);
+
+  @if map.has-key($grid-breakpoints, $value) {
+    // @debug in else if value $value;
+    @return remove-unit-and-convert(map.get($grid-breakpoints, $value));
+  } @else if meta.type-of($value) == number {
+    @return remove-unit-and-convert($value);
+  } @else {
+    @error 'Invalid value "#{$value}" for #{$name}". Must be a breakpoint identifier or a nnumber.';
+  }
+}
+
+// Removes 'em, rem', multiply with 16 and returns the unitless value
+@function remove-unit-and-convert($value) {
+  $unit: math.unit($value);
+
+  // @debug unit $unit;
+
+  @if $unit == rem {
+    $unitless-number: calc($value / 1rem);
+
+    @return multiply-by(16, $unitless-number);
+  }
+
+  @if $unit == em {
+    $unitless-number: calc($value / 1em);
+
+    @return multiply-by(16, $unitless-number);
+  }
+
+  @if $unit == px {
+    $unitless-number: calc($value / 1px);
+
+    @return $unitless-number;
+  }
+
+  @return $value;
+}
+
+@function multiply-by($factor: 16, $value) {
+  @return $factor * $value;
+}
+
+// @function clr($color, $shade) {
+//   @if map.has-key($colors, $color, $shade) {
+//     @return map.get($colors, $color, $shade);
+//   } @else {
+//     @error '$colors does not have that color!';
+//   }
+// }
+// @function fs($font-size) {
+//   @if map.has-key($font-sizes, $font-size) {
+//     @return map.get($font-sizes, $font-size);
+//   } @else {
+//     @error '$font-sizes does not have that size!';
+//   }
+// }
+
+// @function size($size) {
+//   @if map.has-key($spacers, $size) {
+//     @return map.get($spacers, $size);
+//   } @else {
+//     @error '$spacers does not have that size!';
+//   }
+// }
+@function breakpoint-prefix($name, $breakpoints: $grid-breakpoints) {
+  // @debug before meta.type-of($name);
+  // @debug name $name;
+
+  @if not breakpoint-min($name, $breakpoints) {
+    @return '';
+  } @else if meta.type-of($name) == number {
+    // @debug is number;
+    @return '\\00003#{$name}\\:';
+    @return escape-leading-digit(to-string($name));
+  } @else {
+    @return '#{$name}\\:';
+  }
+
+  // @return if(breakpoint-min($name, $breakpoints) == null, '', '#{$name}\\:');
+}
+
+@function breakpoint-infix($name, $breakpoints: $grid-breakpoints) {
+  @return if(breakpoint-min($name, $breakpoints) == null, '', '-#{$name}');
+}
+
+@function breakpoint-key($name, $breakpoints: $grid-breakpoints) {
+  @if not breakpoint-min($name, $breakpoints) {
+    @return '';
+  }
+
+  @return '#{$name}';
+}
+
+@function starts-with-digit($value) {
+  @if meta.type-of($value) != 'string' or string.length($value) == 0 {
+    @return false;
+  }
+
+  $first: string.slice($value, 1, 1); // first character
+
+  @return string.index('0123456789', $first) != null;
+}
+
+// @function escape-leading-digit($token) {
+//   // Normalize to string (handles numbers like 3xl which Sass treats as number + unit)
+//   $s: if(
+//     meta.type-of($token) == 'string',
+//     $token,
+//     meta.inspect($token)
+//   ); // "3xl"
+
+//   $first: string.slice($s, 1, 1);
+//   @if string.index('0123456789', $first) {
+//     // Make the first char a hex escape for that digit.
+//     // Short form: \3 + <digit>  → \33 for '3', \37 for '7', etc.
+//     // Or use 6-digit for nicer serialization: \00003<digit>
+//     $s: '\\3#{$first}'+ string.slice($s, 2) + '\\:'; // -> "\33xl"
+//     // $s: "\\00003#{$first}" + string.slice($s, 2);   // -> "\000033xl" (no visual gap)
+//   }
+
+//   @return $s;
+// }
+
+@function null-safe-suffix($value) {
+  @return if($value == null, '', '-#{$value}');
+}
+
+@function null-safe-value($value) {
+  @return if($value == null, '', '#{$value}');
+}
+
+@function breakpoint-min($name, $breakpoints: $grid-breakpoints) {
+  $min: map.get($breakpoints, $name);
+
+  // @debug min $min;
+  @return if($min != 0, $min, null);
+}
+
+@function to-string($value) {
+  // meta.inspect returns a string representation
+  // Use string.unquote to ensure it’s unquoted (e.g. turns `"3xl"` into 3xl)
+  @return string.unquote(meta.inspect($value));
+}
+
+// @function map-loop-advanced($map, $func, $args...) {
+//   $_map: ();
+
+//   // @debug type-of args meta.type-of($args);
+//   // @debug args__ $args;
+//   // @debug map $map;
+//   @each $key, $value in $map {
+//     // allow to pass the $key and $value of the map as an function argument
+//     // @debug a key $key value $value;
+//     $_args: ();
+//     @each $arg in $args {
+//       // @debug arg $arg;
+//       $_args: list.append(
+//         $_args,
+//         if($arg == '$key', $key, if($arg == '$value', $value, $arg))
+//       );
+//       // @debug append arg $_args;
+//     }
+
+//     // @debug after each loop _args $_args;
+
+//     $_map: map.merge(
+//       $_map,
+//       (
+//         $key: meta.call(meta.get-function($func), $_args...),
+//       )
+//     );
+//     // @debug _map $_map;
+//   }
+//   // @debug return _map $_map;
+//   @return $_map;
+// }
+@function map-loop($map, $func, $args...) {
+  $_map: ();
+
+  // @debug args $args;
+  // @debug map $map;
+
+  @each $key, $value in $map {
+    // allow to pass the $key and $value of the map as an function argument
+    // @debug key $key;
+    // @debug value $value;
+
+    $_args: ();
+
+    @each $arg in $args {
+      $_args: list.append(
+        $_args,
+        if(
+          $arg == '$key',
+          $key,
+          if($arg == '$value', $value, if($arg == '$pair', $key $value, $arg))
+        )
+      );
+
+      // @debug _args $_args;
+    }
+
+    // @debug _args after loop $_args;
+
+    $_map: map.merge(
+      $_map,
+      (
+        $key: meta.call(meta.get-function($func), $_args...),
+      )
+    );
+  }
+
+  // @debug _map $_map;
+
+  @return $_map;
+}
+
+@function to-list($value) {
+  @if meta.type-of($value) == 'list' {
+    @return $value;
+  } @else {
+    @return list.append((), $value); // Wrap it into a list
+  }
+}
+
+@function remove-prefix($string, $prefix) {
+  @if string.index($string, $prefix) == 1 {
+    @return string.slice($string, string.length($prefix) + 1);
+  }
+
+  @return $string;
+}
+
+@function remove-substring($string, $substring) {
+  @if string.index($string, $substring) {
+    $sub-string-index: string.index($string, $substring) - 1;
+
+    @return string.slice($string, 1, $sub-string-index);
+  }
+
+  @return $string;
+}
+
+@function normalize-value($value) {
+  @return if($value == '', '""', $value);
+}
+
+@function to-rgb($value) {
+  // @debug value $value;
+  $_value: if($value == null, #000, $value);
+
+  @return color.channel($_value, 'red'), color.channel($_value, 'green'),
+    color.channel($_value, 'blue');
+}
+
+@function hover-color($identifier, $target, $color-prefix, $cp-namespace: $cp-namespace) {
+  // @debug identifier $identifier;
+  // @debug target $target;
+  // @debug color-prefix $color-prefix;
+  // @debug prefix $prefix;
+
+  @return var(--#{$cp-namespace}#{$color-prefix}#{$identifier});
+}
+
+// @function rgba-css-var($identifier, $target, $color-prefix, $cp-namespace: '') {
+//   @if $identifier == 'body' and $target == 'bg' {
+//     @return rgba(
+//       var(--#{$cp-namespace}#{$color-prefix}#{$identifier}-bg-rgb),
+//       var(--#{$target})
+//     );
+//   }
+//   @if $identifier == 'body' and $target == 'text' {
+//     @return rgba(
+//       var(--#{$cp-namespace}#{$color-prefix}#{$identifier}-color-rgb),
+//       var(--#{$target})
+//     );
+//   } @else {
+//     @return rgba(
+//       var(--#{$cp-namespace}#{$color-prefix}#{$identifier}-rgb),
+//       var(--#{$target}, 1)
+//     );
+//   }
+// }
+
+// stylelint-disable scss/dollar-variable-pattern
+@function rgba-css-var($identifier, $target) {
+  @if $identifier == 'body' and $target == 'bg' {
+    @return rgba(
+      var(--#{$cp-namespace}#{$identifier}-bg-rgb),
+      var(--#{$cp-namespace}#{$target}-opacity)
+    );
+  }
+
+  @if $identifier == 'body' and $target == 'text' {
+    @return rgba(
+      var(--#{$cp-namespace}#{$identifier}-color-rgb),
+      var(--#{$cp-namespace}#{$target}-opacity)
+    );
+  } @else {
+    @return rgba(
+      var(--#{$cp-namespace}#{$identifier}-rgb),
+      var(--#{$cp-namespace}#{$target}-opacity)
+    );
+  }
+}
+
+@function rgba-css-var-advanced(
+  $identifier,
+  $target,
+  $local-prefix: '',
+  $opacity-variable-name: alpha
+) {
+  @if $identifier == 'body' and $target == 'bg' {
+    @return rgba(
+      var(--#{$cp-namespace}#{$identifier}-bg-rgb),
+      var(--#{$cp-namespace}#{$opacity-variable-name}, 1)
+    );
+  }
+
+  @if $identifier == 'body' and $target == 'text' {
+    @return rgba(
+      var(--#{$cp-namespace}#{$identifier}-color-rgb),
+      var(--#{$cp-namespace}#{$opacity-variable-name}, 1)
+    );
+  } @else {
+    @return rgba(
+      var(--#{$cp-namespace}#{$local-prefix}#{$identifier}-rgb),
+      var(--#{$cp-namespace}#{$opacity-variable-name}, 1)
+    );
+  }
+}
+
+@function value-to-css-translate($value, $axis: null) {
+  // @debug value $value;
+  // @debug axis $axis;
+  @if $axis == x {
+    @return translateX(#{$value});
+  } @else if $axis == y {
+    @return translateY(#{$value});
+  } @else {
+    @return translate(#{$value});
+  }
+}
+
+@function add-hyphen($string, $position: 'append', $separator: '-') {
+  @if $string {
+    // Handle empty string
+    @if $string == '' {
+      @return $string;
+    }
+
+    $result: $string;
+    $first-char: string.slice($string, 1, 1);
+    $last-char: string.slice($string, -1);
+
+    // Append (only if doesn't already end with separator)
+    @if $position == 'append' and $last-char != $separator {
+      $result: $string + $separator;
+    }
+
+    // Prepend (only if doesn't already start with separator)
+    @if $position == 'prepend' and $first-char != $separator {
+      $result: $separator + $string;
+    }
+
+    // Wrap (add to both sides only if missing)
+    @if $position == 'wrap' {
+      @if $first-char != $separator {
+        $result: $separator + $result;
+      }
+
+      @if $last-char != $separator {
+        $result: $result + $separator;
+      }
+    }
+
+    @return $result;
+  }
+
+  @return null;
+}
+
+@function single-or-null($list) {
+  // @debug list length list.length($list);
+  // @debug meta.type-of($list);
+  // @debug meta.type-of($list) == list;
+
+  @if meta.type-of($list) == 'list' and list.length($list) == 1 {
+    // @debug list value list.nth($list, 1);
+    @return list.nth($list, 1);
+  }
+
+  @return null;
+}
+
+@function negativify-map($map) {
+  $result: ();
+
+  @each $key, $value in $map {
+    $negative-value: -1 * $value;
+
+    @if $key != 0 {
+      $result: map.merge(
+        $result,
+        (
+          $key: $negative-value,
+        )
+      );
+    }
+  }
+
+  @return $result;
+}
+
+@function deep-loop($map, $cp-namespace: $cp-namespace) {
+  $flat-map: (); // Initialize an empty map to store the results
+
+  @each $key, $value in $map {
+    // Generate a new key by concatenating the prefix and the current key
+    $new-key: if($cp-namespace != '', '#{$cp-namespace}-#{$key}', $key);
+
+    @if meta.type-of($value) == 'map' {
+      // Recursively call the function if the value is a map
+      $flat-map: map.merge($flat-map, deep-loop($value, $new-key));
+    } @else {
+      // Otherwise, add the key-value pair to the flat map
+      $flat-map: map.merge(
+        $flat-map,
+        (
+          $new-key: $value,
+        )
+      );
+    }
+  }
+
+  @return $flat-map; // Return the flattened map
+}

@@ -1,0 +1,324 @@
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:meta';
+@use 'sass:string';
+@use 'functions' as *;
+@use 'variables' as *;
+
+$patterns: (
+  'children-reset-spacing': (
+    class: children\:spacing-0,
+    nesting: (
+      '& *': (
+        padding: 0,
+        margin: 0,
+      ),
+    ),
+    responsive: true,
+    important: true,
+  ),
+
+  'direct-children-reset-spacing': (
+    class: direct-children\:spacing-0,
+    nesting: (
+      '& > *': (
+        padding: 0,
+        margin: 0,
+      ),
+    ),
+  ),
+  'children-remove-margin': (
+    class: children\:m-0,
+    nesting: (
+      '& *': (
+        margin: 0,
+      ),
+    ),
+  ),
+  'direct-children-remove-margin': (
+    class: direct-children\:m-0,
+    nesting: (
+      '& > *': (
+        margin: 0,
+      ),
+    ),
+  ),
+  'first-child-margin-0': (
+    class: first-child\:m-0,
+    nesting: (
+      '& > *:first-child': (
+        margin: 0,
+      ),
+    ),
+  ),
+  'last-child-margin-0': (
+    class: last-child\:m-0,
+    nesting: (
+      '& > *:first-child': (
+        margin: 0,
+      ),
+    ),
+  ),
+  'children-custom-marker': (
+    class: children\:custom-marker,
+    nesting: (
+      '& li::marker': (
+        color: var(--marker-color),
+        font-size: var(--marker-font-size),
+      ),
+    ),
+  ),
+  'children-marker-image': (
+    class: children\:custom-marker-image,
+    nesting: (
+      '& li::marker': (
+        list-style-image: var(--marker-image-src),
+      ),
+    ),
+  ),
+  'direct-children-marker-image': (
+    class: direct-children\:custom-marker-image,
+    nesting: (
+      '& li::marker': (
+        list-style-image: var(--marker-image-src),
+      ),
+    ),
+  ),
+  'direct-child-custom-marker': (
+    class: direct-children\:custom-marker,
+    nesting: (
+      '& > li::marker': (
+        color: var(--marker-color),
+        font-size: var(--marker-font-size),
+      ),
+    ),
+  ),
+  'focus-visible-children': (
+    class: focus-visible\:children,
+    nesting: (
+      '& :where(a, button, input, textarea, select, details, iframe):focus-visible': (
+        outline: 0,
+        box-shadow: var(--box-shadow-focus),
+      ),
+    ),
+  ),
+
+  'flow-direct-children': (
+    class: flow,
+    nesting: (
+      '& > * + *': (
+        margin-top: var(--flow-space, 1em),
+      ),
+    ),
+  ),
+  'flow-all': (
+    class: flow-all,
+    nesting: (
+      '& * + *': (
+        margin-top: var(--flow-space, 1em),
+      ),
+    ),
+  ),
+  'overlay-custom': (
+    class: overlay,
+    nesting: (
+      position: relative,
+      '&::after': (
+        content: "''",
+        position: absolute,
+        inset: 0,
+        background-color: var(--overlay-background, var(--clr-black)),
+        opacity: var(--alpha, 0.5),
+        z-index: var(--overlay-zindex, -1),
+      ),
+    ),
+  ),
+  'fade': (
+    class: fade,
+    nesting: (
+      transition: opacity 0.15s linear,
+      '&:not(.show)': (
+        opacity: 0,
+      ),
+      '&.show': (
+        opacity: 0.5,
+      ),
+    ),
+  ),
+  'collapse': (
+    class: collapse,
+    nesting: (
+      '&:not(.show)': (
+        display: none,
+      ),
+    ),
+  ),
+
+  'direct-child-a-text-none': (
+    class: direct-children-a\:no-underline,
+    nesting: (
+      '& > a': (
+        text-decoration: none,
+      ),
+    ),
+  ),
+  'direct-children-a-reset': (
+    responsive: true,
+
+    class: direct-children-a\:reset,
+    nesting: (
+      '& > a': (
+        text-decoration: none,
+        color: inherit,
+      ),
+    ),
+  ),
+  'children-a-reset': (
+    responsive: true,
+
+    class: children-a\:reset,
+    nesting: (
+      '& a': (
+        text-decoration: none,
+        color: inherit,
+      ),
+    ),
+  ),
+  'children-a-text-none': (
+    class: children-a\:no-underline,
+    nesting: (
+      '&  a': (
+        text-decoration: none,
+      ),
+    ),
+  ),
+  'children-a-text-color': (
+    class: children-a\:text-color,
+    nesting: (
+      '& a': (
+        color: var(--a-clr),
+      ),
+    ),
+  ),
+  'children-a-text-inherit': (
+    class: children-a\:text-inherit,
+    nesting: (
+      '& a': (
+        color: inherit,
+      ),
+    ),
+  ),
+  'children-list-reset': (
+    class: children\:list-reset,
+    nesting: (
+      '&  ul': (
+        list-style: none,
+        padding-left: 0,
+      ),
+    ),
+  ),
+  'children-list-none': (
+    class: children\:list-reset,
+    nesting: (
+      '&  ul': (
+        list-style: none,
+      ),
+    ),
+  ),
+  'direct-children-list-reset': (
+    class: direct-children\:list-none,
+    nesting: (
+      '& > ul': (
+        list-style: none,
+        padding-left: 0,
+      ),
+    ),
+  ),
+  'direct-children-list-none': (
+    class: direct-children\:list-none,
+    nesting: (
+      '& > ul': (
+        list-style: none,
+      ),
+    ),
+  ),
+  'children-center': (
+    class: children\:center,
+    nesting: (
+      '& *': (
+        text-align: center,
+      ),
+    ),
+  ),
+  'before-background': (
+    class: before\:background,
+    nesting: (
+      '&::before': (
+        content: '',
+        display: var(--before-display, block),
+        background-image: var(--before-background),
+        background-repeat: no-repeat,
+        background-size: var(--before-background-size, cover),
+        width: var(--before-width, 20px),
+        height: var(--before-height, 20px),
+      ),
+    ),
+  ),
+  'before-dot': (
+    class: before\:dot,
+    nesting: (
+      '&::before': (
+        content: '',
+        display: var(--before-display, block),
+        background-color: var(--before-bg, var(--clr-primary)),
+        width: var(--before-width, 20px),
+        height: var(--before-height, 20px),
+        border-radius: 100%,
+      ),
+    ),
+  ),
+  'focus-within-outline': (
+    class: focus-within\:outline,
+    nesting: (
+      '&:focus-within': (
+        outline: var(--outline-width, 2px) var(--outline-style, solid)
+          var(--outline-color, currentColor),
+        outline-offset: var(--outline-offset, 0.2lh),
+      ),
+    ),
+  ),
+
+  'children-font-weight': (
+    values: $font-weights,
+    class: children\:fw,
+    nesting: (
+      '& *': (
+        font-weight: #{VALUE},
+      ),
+    ),
+  ),
+  'direct-children-flex': (
+    class: direct-children\:flex-1,
+    nesting: (
+      '& > *': (
+        flex: 1,
+      ),
+    ),
+  ),
+  'children-color-inherit': (
+    class: children\:text-inherit,
+    nesting: (
+      '&  *': (
+        color: inherit,
+      ),
+    ),
+  ),
+  'direct-children-color-inherit': (
+    class: direct-children\:text-inherit,
+    nesting: (
+      '& > *': (
+        color: inherit,
+      ),
+    ),
+  ),
+);

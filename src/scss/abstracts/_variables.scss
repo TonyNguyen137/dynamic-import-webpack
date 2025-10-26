@@ -1,0 +1,524 @@
+/* 
+This file contains SCSS variables sourced from the Bootstrap framework.
+Source: https://github.com/twbs/bootstrap/blob/main/scss/_variables.scss
+The code used in accordance with Bootstrap's open-source license (MIT).
+Modifications may have been made to the original code.
+*/
+@use "sass:map";
+@use "sass:string";
+@use "sass:list";
+@use "sass:math";
+
+/* ****************************************************** */
+
+/* General setting
+/* ****************************************************** */
+
+$cp-namespace: "";
+$enable-transitions: true;
+$enable-reduced-motion: true;
+
+/* ****************************************************** */
+/* Bootstrap grid system
+/* ****************************************************** */
+
+$bs-prefix: bs-;
+$enable-bootstrap-grid-system: false;
+$enable-gutters: false;
+$grid-columns: 12;
+$grid-gutter-width: 24px;
+$grid-row-columns: 6;
+
+/* ****************************************************** */
+/* Container
+/* ****************************************************** */
+
+$enable-container-classes: true;
+$enable-max-container-classes: false;
+$enable-max-container-fluid-classes: false;
+$container-padding: 12px;
+
+/* ****************************************************** */
+/* Container free layout
+/* ****************************************************** */
+
+$enable-container-free-layout: false;
+$content-max-size: 1340px;
+$content-padding: 2rem;
+$content-breakout: 4rem;
+
+/* ******************************************************* */
+
+/* Breakpoints 
+/* ******************************************************* */
+
+// px values
+$grid-breakpoints: (
+  xs: 0,
+  xsm: 375px,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+);
+$grid-breakpoints-up: map.remove($grid-breakpoints, xs);
+
+// rem values
+// $grid-breakpoints: (
+//   xs: 0,
+//   sm: px-to-rem(576),
+//   md: px-to-rem(768),
+//   lg: px-to-rem(992),
+//   xl: px-to-rem(1200),
+//   xxl: px-to-rem(1400),
+// );
+
+/* ****************************************************** */
+
+/* Container max-widths 
+/* ****************************************************** */
+
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1320px,
+);
+
+// @debug map.get($container-max-widths, sm);
+// @debug map.get($container-max-widths, 3xl);
+// @debug map.get($grid-breakpoints, 3xl);
+
+/* ****************************************************** */
+
+/* Container queries width
+/* ****************************************************** */
+
+$container-query-sizes: ();
+
+/* ****************************************************** */
+
+/* Color theme
+/* ****************************************************** */
+
+$color-prefix: clr-;
+$hover-prefix: hover-;
+
+$color-theme: (
+  default: (
+    color: (
+      "primary": #0d6efd,
+      "secondary": #6c757d,
+      "success": #198754,
+      "info": #0dcaf0,
+      "warning": #ffc107,
+      "danger": #dc3545,
+      "light": #f8f9fa,
+      "dark": #212529,
+      "neutral": #dee2e6,
+      "zero": #000,
+      "one": #fff,
+      "black": #000,
+      "white": #fff,
+    ),
+    hover: (
+      "gold": #ffd700,
+    ),
+  ),
+);
+$selected-theme: default;
+$selected-theme-hex-colors: if(
+  map.has-key($color-theme, $selected-theme, color),
+  map.get($color-theme, $selected-theme, color),
+  null
+);
+$selected-theme-hover-hex-colors: if(
+  map.has-key($color-theme, $selected-theme, hover),
+  map.get($color-theme, $selected-theme, hover),
+  null
+);
+
+// pick which colors should have a rgb custom property
+// $selected-theme-rgb: (
+//   'primary': map.get($color-theme, $selected-theme, color, primary),
+// );
+
+$enable-rgb-colors: true;
+$enable-color-themes: false;
+
+/* ************************************************************* */
+
+/* Clamp() values
+/* ************************************************************* */
+
+$font-size-clamp: (
+  fluid-heading-1: (
+    // default true
+    create-custom-property: true,
+    threshold: (
+      sm: 32,
+      1800: 60,
+    ),
+    // default rem
+    threshold-unit: "rem",
+    // default viewport
+    relative-to: "viewport",
+  ),
+);
+$spacing-clamp: (
+  "fluid-sp-32-150": (
+    // default true
+    create-custom-property: true,
+    threshold: (
+      576px: 32,
+      1400px: 150,
+    ),
+    // default px
+    threshold-unit: "px",
+    // default viewport
+    relative-to: "viewport",
+  ),
+);
+$container-clamp: (
+  "fluid-ct-16-48": (
+    // default true
+    create-custom-property: true,
+    threshold: (
+      576px: 16,
+      992px: 48,
+    ),
+    // default px
+    threshold-unit: "rem",
+    // default container
+    relative-to: "container",
+  ),
+);
+
+/* ************************************************************* */
+
+/* Simple custom properties
+/* ************************************************************* */
+
+$simple-custom-properties: (
+  "container-padding": (
+    value: $container-padding,
+  ),
+  "example-custom-property": (
+    value: 32px,
+    property: font-size,
+    class: example-class,
+  ),
+);
+
+/* ****************************************************** */
+
+/* Responsive Custom Properties
+/* ****************************************************** */
+
+$responsive-custom-properties: (
+  xs: (
+    "container-padding": (
+      value: $container-padding,
+
+      // optional utility class
+      property: padding-inline,
+      class: border-width-container,
+    ),
+    "navigation-header": (
+      value: 50px,
+      //optional
+      property: height,
+      class: navigation-height,
+    ),
+  ),
+  sm: (
+    container: map.get($container-max-widths, sm),
+    navigation-header: 60px,
+  ),
+  md: (
+    container: map.get($container-max-widths, md),
+    navigation-header: 70px,
+  ),
+  lg: (
+    container: map.get($container-max-widths, lg),
+    navigation-header: 80px,
+  ),
+  xl: (
+    container: map.get($container-max-widths, xl),
+    navigation-header: 90px,
+  ),
+  xxl: (
+    container: map.get($container-max-widths, xxl),
+    navigation-header: 100px,
+  ),
+);
+
+/* ****************************************************** */
+
+/* Spacing
+/* ****************************************************** */
+
+$enable-negative-margins: true;
+$factor: 4px; //  0.25rem
+$sizes-regular: ();
+
+@for $i from 0 through 50 {
+  $sizes-regular: map.merge(
+    $sizes-regular,
+    (
+      $i: if($i == 0, $i, $factor * $i),
+    )
+  );
+}
+
+// Add additional regular sizes manually
+$sizes-regular: map.merge(
+  $sizes-regular,
+  (
+    100: 100 * $factor,
+  )
+);
+$sizes-irregular: ();
+$factor: 1px; // 0.0625rem
+
+@for $i from 1 through 200 {
+  @if $i % 4 != 0 {
+    $sizes-irregular: map.merge($sizes-irregular, (i-#{$i}: $i * $factor));
+  }
+}
+
+// Add additional irregular sizes manually
+$sizes-irregular: map.merge(
+  $sizes-irregular,
+  (
+    i-201: 201px,
+  )
+);
+
+/* ****************************************************** */
+
+/* Box shadows 
+/* ****************************************************** */
+
+$box-shadows: (
+  custom-property-name: "box-shadow",
+  values: (
+    focus: 0 0 0 var(--shadow-width, 0.25rem) rgb(var(--clr-primary-rgb), 0.25),
+    focus-inset: inset 0 0 0 0.25rem rgb(var(--clr-primary-rgb), 0.25),
+    null: 0 0.5rem 1rem rgb(var(--clr-dark-rgb), 0.15),
+    sm: 0 0.125rem 0.25rem rgb(var(--clr-dark-rgb), 0.075),
+    lg: 0 1rem 3rem rgb(var(--clr-dark-rgb), 0.175),
+    inset: inset 0 1px 2px rgb(var(--clr-dark-rgb), 0.075),
+  ),
+);
+
+/* ****************************************************** */
+
+/* Z-index 
+/* ****************************************************** */
+
+$z-indeces: (
+  custom-property-name: "z",
+  values: (
+    1st: 999,
+    2nd: 998,
+    3rd: 997,
+    last: -999,
+    2nd-last: -998,
+    3rd-last: -997,
+  ),
+);
+
+/* ****************************************************** */
+
+/* Borders  
+/* ****************************************************** */
+
+$borders: (
+  custom-property-name: "border",
+  values: (
+    main: 1px solid var(--#{$cp-namespace}clr-primary),
+  ),
+);
+
+/* ****************************************************** */
+
+/* Border radius 
+/* ****************************************************** */
+
+$border-radius: (
+  custom-property-name: "rounded",
+  values: (
+    sm: 4px,
+    base: 6px,
+    lg: 12px,
+  ),
+);
+
+/* ****************************************************** */
+
+/* Transitions
+/* ****************************************************** */
+
+$transitions: (
+  custom-property-name: "transition",
+  values: (
+    base: 250ms ease,
+    fade: 300ms ease,
+    movement: 200ms linear,
+
+    bounce: 500ms cubic-bezier(0.5, 0.05, 0.2, 1.5),
+  ),
+);
+
+/* ****************************************************** */
+
+/* Font family
+/* ****************************************************** */
+
+$font-families: (
+  custom-property-name: "font-family",
+  values: null,
+);
+
+/* ****************************************************** */
+
+/* Maps
+/* ****************************************************** */
+
+$percentage-values: (
+  0: 0,
+  5: 5%,
+  10: 10%,
+  15: 15%,
+  20: 20%,
+  25: 25%,
+  30: 30%,
+  35: 35%,
+  40: 40%,
+  45: 45%,
+  50: 50%,
+  55: 55%,
+  60: 60%,
+  65: 65%,
+  70: 70%,
+  75: 75%,
+  80: 80%,
+  85: 85%,
+  90: 90%,
+  95: 95%,
+  100: 100%,
+);
+$decimal-percentage-values: (
+  0: 0,
+  5: 0.05,
+  10: 0.1,
+  15: 0.15,
+  20: 0.2,
+  25: 0.25,
+  30: 0.3,
+  35: 0.35,
+  40: 0.4,
+  45: 0.45,
+  50: 0.5,
+  55: 0.55,
+  60: 0.6,
+  65: 0.65,
+  70: 0.7,
+  75: 0.75,
+  80: 0.8,
+  85: 0.85,
+  90: 0.9,
+  95: 0.95,
+  100: 1,
+  101: 1.01,
+  102: 1.02,
+  103: 1.03,
+  104: 1.04,
+  105: 1.05,
+  110: 1.1,
+  115: 1.15,
+  120: 1.2,
+  130: 1.3,
+);
+$viewport-height-values: (
+  25: 25vh,
+  50: 50vh,
+  75: 75vh,
+  100: 100vh,
+);
+$viewport-width-values: (
+  25: 25vw,
+  50: 50vw,
+  75: 75vw,
+  100: 100vw,
+);
+$border-widths: (
+  n3: -3px,
+  n2: -2px,
+  n1: -1px,
+  0: 0px,
+  1: 1px,
+  2: 2px,
+  3: 3px,
+  4: 4px,
+  5: 5px,
+  6: 6px,
+  7: 7px,
+  8: 8px,
+  9: 9px,
+  10: 10px,
+  11: 11px,
+  12: 12px,
+  13: 13px,
+  14: 14px,
+  15: 15px,
+  16: 16px,
+  17: 17px,
+  18: 18px,
+  19: 19px,
+  20: 20px,
+  "01lh": 0.1lh,
+  "02lh": 0.2lh,
+  "03lh": 0.3lh,
+  "04lh": 0.4lh,
+  "05lh": 0.5lh,
+);
+$border-styles: (
+  solid: solid,
+  dashed: dashed,
+  dotted: dotted,
+  groove: groove,
+  none: none,
+  double: double,
+  inset: inset,
+);
+$duration-values-map: (
+  100: 100ms,
+  200: 200ms,
+  300: 300ms,
+  400: 400ms,
+  500: 500ms,
+  600: 600ms,
+  700: 700ms,
+  800: 800ms,
+  900: 900ms,
+  1000: 1000ms,
+  1500: 1500ms,
+  2000: 2000ms,
+  2500: 2500ms,
+  3000: 3000ms,
+);
+$font-weights: (
+  thin: 100,
+  extra-light: 200,
+  light: 300,
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+  extra-bold: 800,
+  "black": 900,
+);

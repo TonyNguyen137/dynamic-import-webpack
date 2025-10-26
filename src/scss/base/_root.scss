@@ -1,0 +1,73 @@
+@use '../abstracts' as *;
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:list';
+@use 'sass:math';
+
+:root {
+  // @include export-breakpoints-json($grid-breakpoints);
+  @include generate-custom-properties(
+    if(meta.variable-exists(grid-breakpoints), $grid-breakpoints, null),
+    'bp-'
+  );
+  @include generate-custom-properties(
+    if(meta.variable-exists(font-families), $font-families, null)
+  );
+  @include generate-custom-properties(if(meta.variable-exists(box-shadows), $box-shadows, null));
+  @include generate-custom-properties(if(meta.variable-exists(z-indeces), $z-indeces, null));
+  @include generate-custom-properties(if(meta.variable-exists(transitions), $transitions, null));
+  @include generate-custom-properties(if(meta.variable-exists(borders), $borders, null));
+  @include generate-custom-properties(
+    if(meta.variable-exists(border-radius), $border-radius, null)
+  );
+  @include generate-custom-properties(if(meta.variable-exists(focus-rings), $focus-rings, null));
+  @include generate-simple-custom-properties(
+    if(meta.variable-exists(simple-custom-properties), $simple-custom-properties, null)
+  );
+
+  // Custom properties for default color theme
+  @include generate-color-custom-properties($selected-theme-hex-colors, $color-prefix);
+  @include generate-color-custom-properties-rgb($selected-theme-rgb-colors, $color-prefix);
+
+  // @include generate-color-custom-properties-rgb(
+  //   if(meta.variable-exists(selected-theme-rgb), map-loop($selected-theme-rgb, to-rgb, '$value'), ()),
+  //   if(meta.variable-exists(color-prefix), $color-prefix, '')
+  // );
+
+  // custom properties for default hover color
+  @include generate-color-custom-properties(
+    if(
+      map.get($color-theme, $selected-theme, hover),
+      map.get($color-theme, $selected-theme, hover),
+      ()
+    ),
+    if(meta.variable-exists(hover-prefix), $hover-prefix, '')
+  );
+  @include generate-color-custom-properties-rgb(
+    if(
+      $enable-rgb-colors and map.get($color-theme, $selected-theme, hover),
+      map-loop(map.get($color-theme, $selected-theme, hover), to-rgb, '$value'),
+      ()
+    ),
+    if(meta.variable-exists(hover-prefix), $hover-prefix, '')
+  );
+  @include generate-clamp-custom-properties(
+    if(meta.variable-exists(font-size-clamp), $font-size-clamp, null)
+  );
+  @include generate-clamp-custom-properties(
+    if(meta.variable-exists(spacing-clamp), $spacing-clamp, null),
+    'px'
+  );
+  @include generate-clamp-custom-properties(
+    if(meta.variable-exists(container-clamp), $container-clamp, null),
+    'rem',
+    'container'
+  );
+
+  // Generates responsive custom properties
+  @include generate-responsive-custom-properties($responsive-custom-properties);
+}
+
+@if $enable-color-themes {
+  @include generate-color-themes($color-theme);
+}

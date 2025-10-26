@@ -1,0 +1,36 @@
+@use '../abstracts' as *;
+@use 'sass:map';
+
+@if ($enable-container-free-layout) {
+  .grid-content {
+    display: grid;
+
+    // prettier-ignore
+    grid-template-columns:
+      [full-width-start] 
+				minmax($content-padding, 1fr) 
+        [breakout-start] 
+					minmax(0, $content-breakout) 
+        		[content-start] min(100% - #{$content-padding * 2}, $content-max-size) [content-end] 
+					minmax(0, $content-breakout) 
+				[breakout-end] 
+				minmax($content-padding, 1fr) 
+			[full-width-end];
+  }
+
+  .grid-content > *:not(.breakout, .full-width),
+  .full-width > *:not(.breakout, .full-width) {
+    grid-column: content;
+  }
+
+  .grid-content > .breakout {
+    grid-column: breakout;
+  }
+
+  .grid-content > .full-width {
+    grid-column: full-width;
+
+    display: grid;
+    grid-template-columns: inherit;
+  }
+}

@@ -1,0 +1,95 @@
+@use '../abstracts/' as *;
+
+html {
+  text-size-adjust: none;
+
+  @if $enable-reduced-motion {
+    @media (prefers-reduced-motion: reduce) {
+      & {
+        scroll-behavior: auto !important;
+      }
+    }
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+
+  @if $enable-reduced-motion {
+    @media (prefers-reduced-motion: reduce) {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+body {
+  font-family: Montserrat, sans-serif;
+
+  /* 5. Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+body,
+figure {
+  margin: 0;
+}
+
+/** 
+  Image reset by Harry Roberts. 
+  @see https://x.com/csswizardry/status/1717841334462005661
+  @see Video: Kevin Powell explains the image reset - https://www.youtube.com/watch?v=345V2MU3E_w&t=151s
+*/
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+  font-style: italic;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+iframe,
+picture,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+/* Inherit fonts for inputs and buttons */
+select,
+input,
+button,
+textarea {
+  color: inherit;
+  font: inherit;
+}
+
+/* Set shorter line heights on headings and interactive elements */
+h1,
+h2,
+h3,
+h4,
+button,
+input,
+label {
+  line-height: 1.1;
+}
+
+/* Improve line wrapping */
+p {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}

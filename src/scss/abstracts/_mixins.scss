@@ -1,0 +1,1222 @@
+/* 
+This file contains SCSS mixins sourced from the Bootstrap framework.
+Source: https://github.com/twbs/bootstrap/tree/main/scss/mixins
+These mixins are used in accordance with Bootstrap's open-source license (MIT).
+Modifications may have been made to the original mixins.
+*/
+@use 'sass:meta';
+@use 'sass:math';
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:string';
+@use 'sass:selector';
+@use 'functions' as *;
+@use 'variables' as *;
+
+@mixin transition($transition...) {
+  @if list.length($transition) == 0 {
+    $transition: $transition-base;
+  }
+
+  @if list.length($transition) > 1 {
+    @each $value in $transition {
+      @if not $value or $value == none {
+        @warn "The keyword 'none' or 'null' must be used as a single argument.";
+      }
+    }
+  }
+
+  @if $enable-transitions {
+    @if list.nth($transition, 1) {
+      transition: $transition;
+    }
+
+    @if $enable-reduced-motion and list.nth($transition, 1) and list.nth($transition, 1) != none {
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+  }
+}
+
+// media query
+
+@mixin mq($breakpoint, $config: ()) {
+  $interaction-fine: fine;
+  $interaction-coarse: coarse;
+  $interaction-none: none;
+  $has-media-hover: false;
+  $_core-config: (
+    grid-breakpoints: $grid-breakpoints,
+    interaction: $interaction-none,
+  );
+  $_config: map.merge($_core-config, $config);
+  $_grid-breakpoints: map.get($_config, grid-breakpoints);
+  $_interaction: map.get($_config, interaction);
+
+  // @debug $_grid-breakpoints;
+  // @debug breakpoint $breakpoint;
+  // @debug bool $breakpoint == xs;
+  // @debug has-key map.has-key($_grid-breakpoints, $breakpoint);
+  // @debug has-key and is xs (map.has-key($_grid-breakpoints, $breakpoint) and $breakpoint == xs);
+  // @debug second ifelse map.get($_grid-breakpoints, $breakpoint);
+
+  @if $breakpoint == xs {
+    // do nothing
+  } @else if map.has-key($_grid-breakpoints, $breakpoint) {
+    $breakpoint-size: map.get($_grid-breakpoints, $breakpoint);
+
+    @if $_interaction == $interaction-fine {
+      @media screen and (min-width: $breakpoint-size) and (hover: hover) and (pointer: fine) {
+        @content;
+      }
+    } @else if $_interaction == $interaction-coarse {
+      @media screen and (min-width: $breakpoint-size) and (hover: none) and (pointer: coarse) {
+        @content;
+      }
+    } @else {
+      @media screen and (min-width: $breakpoint-size) {
+        @content;
+      }
+    }
+  } @else {
+    @error 'the keyword #{$breakpoint} is not in the $breakpoints map';
+  }
+}
+
+// Mixin: Media query for hover-capable devices at a specific breakpoint
+// - Includes (hover: hover) and (pointer: fine) for precision
+// - Falls back to a regular media query if $has-media-hover is false
+// - Throws an error if the breakpoint is not defined in $grid-breakpoints
+@mixin mq-hover-device($breakpoint) {
+  @include mq($breakpoint, true);
+}
+
+@mixin respond-min($breakpoint) {
+  @media (min-width: #{$breakpoint}px) {
+    @content;
+  }
+}
+
+@mixin make-container() {
+  width: 100%;
+  padding-inline: var(--container-padding, 12px);
+  margin-inline: auto;
+}
+
+@mixin make-container-fluid-max($max-width) {
+  max-width: $max-width;
+  padding-inline: var(--container-padding, 12px);
+  margin-inline: auto;
+}
+
+@mixin media-breakpoint-up($name, $breakpoints: $grid-breakpoints) {
+  $min: breakpoint-min($name, $breakpoints);
+
+  // @debug min $min;
+  @if $min {
+    @media screen and (min-width: $min) {
+      // @debug in media $min;
+
+      @content;
+    }
+  } @else {
+    // @debug kein media;
+
+    @content;
+  }
+}
+
+@mixin container-breakpoint-up($name, $breakpoints: $grid-breakpoints) {
+  $min: breakpoint-min($name, $breakpoints);
+
+  // @debug min $min;
+  @if $min {
+    @container (width > #{$min}) {
+      @content;
+    }
+  }
+}
+
+// Bootstrap grid system
+@mixin row-cols($count) {
+  > * {
+    flex: 0 0 auto;
+    width: math.percentage(math.div(1, $count));
+  }
+}
+
+@mixin make-row($gutter: $grid-gutter-width) {
+  --#{$bs-prefix}gutter-x: #{$gutter};
+  --#{$bs-prefix}gutter-y: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: calc(-1 * var(--#{$bs-prefix}gutter-y));
+  margin-right: calc(-0.5 * var(--#{$bs-prefix}gutter-x));
+  margin-left: calc(-0.5 * var(--#{$bs-prefix}gutter-x));
+}
+
+@mixin make-col-ready() {
+  // Add box sizing if only the grid is loaded
+  box-sizing: if(meta.variable-exists(include-column-box-sizing) and $include-column-box-sizing, border-box, null);
+
+  // Prevent columns from becoming too narrow when at smaller grid tiers by
+  // always setting `width: 100%;`. This works because we set the width
+  // later on to override this initial width.
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%; // Prevent `.col-auto`, `.col` (& responsive variants) from breaking out the grid
+  padding-right: calc(var(--#{$bs-prefix}gutter-x) * 0.5); // stylelint-disable-line function-disallowed-list
+  padding-left: calc(var(--#{$bs-prefix}gutter-x) * 0.5); // stylelint-disable-line function-disallowed-list
+  margin-top: var(--#{$bs-prefix}gutter-y);
+}
+
+@mixin make-col($size: false, $columns: $grid-columns) {
+  @if $size {
+    flex: 0 0 auto;
+    width: math.percentage(math.div($size, $columns));
+  } @else {
+    flex: 1 1 0;
+    max-width: 100%;
+  }
+}
+
+@mixin make-col-auto() {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+@mixin make-col-offset($size, $columns: $grid-columns) {
+  $num: math.div($size, $columns);
+
+  margin-left: if($num == 0, 0, math.percentage($num));
+}
+
+@mixin make-grid-columns($columns: $grid-columns, $gutter: $grid-gutter-width, $breakpoints: $grid-breakpoints) {
+  @each $breakpoint in map.keys($breakpoints) {
+    $infix: breakpoint-infix($breakpoint, $breakpoints);
+
+    @include media-breakpoint-up($breakpoint, $breakpoints) {
+      // Provide basic `.col-{bp}` classes for equal-width flexbox columns
+      .col#{$infix} {
+        flex: 1 0 0%; // Flexbugs #4: https://github.com/philipwalton/flexbugs#flexbug-4
+      }
+
+      .row-cols#{$infix}-auto > * {
+        @include make-col-auto;
+      }
+
+      @if $grid-row-columns > 0 {
+        @for $i from 1 through $grid-row-columns {
+          .row-cols#{$infix}-#{$i} {
+            @include row-cols($i);
+          }
+        }
+      }
+
+      .col#{$infix}-auto {
+        @include make-col-auto;
+      }
+
+      @if $columns > 0 {
+        @for $i from 1 through $columns {
+          .col#{$infix}-#{$i} {
+            @include make-col($i, $columns);
+          }
+        }
+
+        // `$columns - 1` because offsetting by the width of an entire row isn't possible
+        @for $i from 0 through ($columns - 1) {
+          @if not($infix == '' and $i == 0) {
+            // Avoid emitting useless .offset-0
+            .offset#{$infix}-#{$i} {
+              @include make-col-offset($i, $columns);
+            }
+          }
+        }
+      }
+
+      @if $enable-gutters {
+        @each $key, $value in $sizes-regular {
+          .g#{$infix}-#{$key},
+          .gx#{$infix}-#{$key} {
+            --#{$bs-prefix}gutter-x: #{$value};
+          }
+
+          .g#{$infix}-#{$key},
+          .gy#{$infix}-#{$key} {
+            --#{$bs-prefix}gutter-y: #{$value};
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin make-cssgrid($columns: $grid-columns, $breakpoints: $grid-breakpoints) {
+  @each $breakpoint in map.keys($breakpoints) {
+    $infix: breakpoint($breakpoint, $breakpoints);
+
+    @include media-breakpoint-up($breakpoint, $breakpoints) {
+      @if $columns > 0 {
+        @for $i from 1 through $columns {
+          .g-col#{$infix}-#{$i} {
+            grid-column: auto / span $i;
+          }
+        }
+
+        // Start with `1` because `0` is an invalid value.
+        // Ends with `$columns - 1` because offsetting by the width of an entire row isn't possible.
+        @for $i from 1 through ($columns - 1) {
+          .g-start#{$infix}-#{$i} {
+            grid-column-start: $i;
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin generate-utility($utility, $bp: '', $breakpoint-key, $key, $is-rfs-media-query: false) {
+  $values: map.get($utility, values);
+  $selected-function: if(map.has-key($utility, function), map.get($utility, function), 'default');
+
+  // Check if the list is not empty before accessing the first element
+  @if list.length($values) > 0 and $values {
+    // If the values are a list or string, convert it into a map
+    @if meta.type-of($values) == 'string' or meta.type-of(list.nth($values, 1)) != 'list' {
+      $values: list.zip($values, $values);
+    }
+  }
+
+  // @debug values $values;
+  // @debug meta.type-of($values);
+
+  $is-important: if(map.get($utility, important), !important, null);
+  $required-property: if(map.has-key($utility, required-property), map.get($utility, required-property), null);
+  $property: map.get($utility, property);
+  $custom-property-value: if(map.has-key($utility, custom-property-value), map.get($utility, custom-property-value), null);
+
+  // @debug $custom-property-value;
+  $class: map.get($utility, class);
+
+  // Multiple properties are possible, for example with vertical or horizontal margins or paddings
+  // @debug properties before $properties;
+
+  @if meta.type-of($property) == 'string' {
+    $property: list.append((), $property);
+
+    // @debug properties inside $properties;
+  }
+
+  // @debug properties after $properties;
+
+  $local-vars: map.get($utility, local-vars);
+  $is-rtl: map.get($utility, rtl);
+  $custom-property-name: map.get($utility, custom-property-name);
+  $nested-selectors: if(map.has-key($utility, complex-selectors), map.get($utility, complex-selectors), null);
+  $complex-selectors: if(map.has-key($utility, complex-selectors), map.get($utility, complex-selectors), null);
+  $state: map.get($utility, state);
+  $custom-property-prefix: map.get($utility, custom-property-prefix);
+  $css-variable-name: map.get($utility, css-variable-name);
+  $media: map.get($utility, media);
+  $has-hyphen: if(map.has-key($utility, has-hyphen), map.get($utility, has-hyphen), true);
+  $responsive-custom-property-value: map.get($utility, responsive-custom-property-value);
+  $properties: map.get($utility, properties);
+  $property-bindings: map.get($utility, property-bindings);
+  $data-map: (
+    breakpoint: $bp,
+    breakpoint-key: $breakpoint-key,
+    class: $class,
+    custom-property-name: $custom-property-name,
+    custom-property-value: $custom-property-value,
+    custom-property-prefix: $custom-property-prefix,
+    css-variable-name: $css-variable-name,
+    has-hyphen: $has-hyphen,
+    important: $is-important,
+    is-rtl: $is-rtl,
+    key: $key,
+    local-vars: $local-vars,
+    media: $media,
+    property: $property,
+    properties: $properties,
+    property-bindings: $property-bindings,
+    responsive-custom-property: $responsive-custom-property-value,
+    required-property: $required-property,
+    state: $state,
+    values: $values,
+  );
+
+  @if $selected-function == 'default' {
+    @include create-default-utility($data-map);
+  } @else if $selected-function == 'fluid' {
+    @include create-fluid-utility($data-map);
+  } @else if $selected-function == 'apply-custom-prop' {
+    @include apply-custom-prop-utility($data-map);
+  } @else if $selected-function == 'apply-custom-props-at-breakpoints' {
+    @include apply-custom-props-at-breakpoints-utility($data-map);
+  } @else if $selected-function == 'set-custom-prop' {
+    @include set-custom-prop-utility($data-map);
+  } @else if $selected-function == 'apply-responsive-prop' {
+    @include apply-responsive-prop-utility($data-map);
+  } @else if $selected-function == 'multi-prop' {
+    @include create-multi-prop-utility($data-map);
+  }
+}
+
+// @mixin apply-responsive-prop-utility($map) {
+//   $responsive-custom-property: map.get($map, responsive-custom-property);
+//   $property: map.get($map, property);
+//   $important: map.get($map, important);
+//   $breakpoint: map.get($map, breakpoint);
+//   $breakpoint-key: map.get($map, breakpoint-key);
+//   $class: map.get($map, class);
+//   $key: map.get($map, key);
+//   $properties-length: list.length($property);
+
+//   // @debug responsive-custom-property $responsive-custom-property;
+//   // @debug important $important;
+//   // @debug breakpoint $breakpoint;
+//   // @debug breakpoint-key $breakpoint-key;
+//   // @debug class $class;
+//   // @debug key $key;
+//   // @debug properties-length $properties-length;
+
+//   @if ($properties-length > 2) {
+//     @error "#{$key} exceeds the maximum of 2 allowed properties. You provided #{$properties-length}.";
+//   }
+//   $breakpoint-key: if($breakpoint-key == '', $breakpoint-key, $breakpoint-key + '-');
+
+//   .#{$breakpoint}#{$class} {
+//     @if ($properties-length == 2) {
+//       @each $prop in $property {
+//         #{$prop}: var(--#{$breakpoint-key}#{$responsive-custom-property}) #{$important};
+//       }
+//     } @else {
+//       #{$property}: var(--#{$breakpoint-key}#{$responsive-custom-property}) #{$important};
+//     }
+//   }
+// }
+
+@mixin generate-pattern($pattern, $bp: '', $breakpoint-key, $key, $is-rfs-media-query: false) {
+  $values: map.get($pattern, values);
+  $selected-function: if(map.has-key($pattern, function), map.get($pattern, function), 'nested-pattern');
+
+  // Check if the list is not empty before accessing the first element
+  @if list.length($values) > 0 and $values {
+    // If the values are a list or string, convert it into a map
+    @if meta.type-of($values) == 'string' or meta.type-of(list.nth($values, 1)) != 'list' {
+      $values: list.zip($values, $values);
+    }
+  }
+
+  // @debug values $values;
+  // @debug meta.type-of($values);
+
+  $is-important: if(map.get($pattern, important), !important, null);
+  $required-property: if(map.has-key($pattern, required-property), map.get($pattern, required-property), null);
+  $nesting: map.get($pattern, nesting);
+
+  // @debug $custom-property-value;
+  $class: map.get($pattern, class);
+  $local-vars: map.get($pattern, local-vars);
+  $is-rtl: map.get($pattern, rtl);
+  $nested-selectors: if(map.has-key($pattern, complex-selectors), map.get($pattern, complex-selectors), null);
+  $complex-selectors: if(map.has-key($pattern, complex-selectors), map.get($pattern, complex-selectors), null);
+  $state: map.get($pattern, state);
+  $media: map.get($pattern, media);
+  $custom-properties: map.get($pattern, custom-properties);
+  $data-map: (
+    nesting: $nesting,
+    values: $values,
+    important: $is-important,
+    required-property: $required-property,
+    breakpoint: $bp,
+    breakpoint-key: $breakpoint-key,
+    class: $class,
+    key: $key,
+    custom-properties: $custom-properties,
+    local-vars: $local-vars,
+    is-rtl: $is-rtl,
+    nested-selectors: $nested-selectors,
+    state: $state,
+    media: $media,
+  );
+
+  @if $selected-function == 'nested-pattern' {
+    @include create-nested-pattern($data-map);
+  }
+}
+
+@mixin create-default-utility($map) {
+  $property: map.get($map, property);
+  $key: map.get($map, key);
+  $values: map.get($map, values);
+  $important: map.get($map, important);
+  $breakpoint: map.get($map, breakpoint);
+  $class: map.get($map, class);
+  $local-vars: map.get($map, local-vars);
+  $states: map.get($map, state);
+  $states-length: if($states, list.length($states), null);
+  $states: if($states-length == 1, to-list($states), $states);
+  $css-var: map.get($map, css-var);
+  $css-variable-name: map.get($map, css-variable-name);
+  $required-property: map.get($map, required-property);
+  $media: map.get($map, media);
+  $has-hyphen: map.get($map, has-hyphen);
+
+  // @debug -------normal-utility---------------;
+  // @debug media $media;
+
+  // @debug property $property;
+  // @debug values $values;
+  // @debug map.get($map, class);
+  // @debug required-property $required-property;
+  // @debug inportant $important;
+  // @debug breakpoint $breakpoint;
+  // @debug key $key;
+  // @debug class $class;
+  // @debug state $states;
+  // @debug meta-state meta.type-of($states);
+  // @debug state-length $states-length;
+  // @debug local-vars $local-vars;
+  // @debug css-var $css-var;
+  // @debug css-variable-name $css-variable-name;
+  // @debug --------------------------;
+
+  @if $values {
+    @if $states and $states-length > 1 {
+      // @debug more than one state;
+      @each $state in $states {
+        @each $key, $value in $values {
+          $key-suffix: if($has-hyphen, null-safe-suffix($key), null-safe-value($key));
+
+          // @debug key-suffix $key-suffix;
+          // @debug what type meta.type-of($breakpoint);
+          // @debug breakpoint 1 $breakpoint;
+
+          .#{$breakpoint}#{if($class, $class, $value)}#{$key-suffix}#{$state} {
+            @if $local-vars {
+              @each $local-var, $value in $local-vars {
+                --#{$local-var}: #{$value};
+              }
+            }
+
+            @if $required-property {
+              @each $prop, $value in $required-property {
+                #{$prop}: $value #{$important};
+              }
+            }
+
+            @each $p in $property {
+              // @debug property $property;
+              #{$p}: $value #{$important};
+            }
+          }
+        }
+      }
+    } @else {
+      // @debug no state;
+
+      @each $key, $value in $values {
+        $key-suffix: if($has-hyphen, null-safe-suffix($key), null-safe-value($key));
+        $single-state: single-or-null($states);
+
+        // @debug key-suffix 2 $key-suffix;
+
+        // @debug key $key;
+        // @debug value $value;
+
+        // @debug key-suffix $key-suffix;
+
+        // @debug single-state $single-state;
+        // @debug $breakpoint;
+        // @debug meta.type-of($breakpoint);
+
+        // @debug meta.type-of($breakpoint) == number;
+        // $breakpoint: if(
+        //   meta.type-of($breakpoint) == number,
+        //   '\\'+ $breakpoint,
+        //   $breakpoint
+        // );
+
+        // @debug new bp $breakpoint;
+
+        .#{$breakpoint}#{if($class, $class, $key)}#{if($class, $key-suffix, '')}#{$single-state} {
+          // @debug value hier- if($class, $class, $value);
+
+          @if $local-vars {
+            @each $local-var, $value in $local-vars {
+              --#{$local-var}: #{$value};
+            }
+          }
+
+          @if $required-property {
+            @each $prop, $value in $required-property {
+              #{$prop}: $value #{$important};
+            }
+          }
+
+          @each $property in $property {
+            @if $media {
+              @media #{$media} {
+                #{$property}: $value #{$important};
+              }
+            } @else {
+              #{$property}: $value #{$important};
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin create-fluid-utility($map) {
+  $property: map.get($map, property);
+  $values: map.get($map, values);
+  $important: map.get($map, important);
+  $breakpoint: map.get($map, breakpoint);
+  $class: map.get($map, class);
+  $fluid-map: $values;
+
+  // @debug -------- fluid ----------------;
+  // @debug property $property;
+  // @debug type-of property meta.type-of($property);
+  // @debug property string #{$property};
+  // @debug #{$property} == $property;
+  // @debug font-size #{$property} == 'font-size';
+  // @debug values $values;
+  // @debug important $important;
+  // @debug breakpoint $breakpoint;
+  // @debug class $class;
+  // @debug breakpoint $breakpoint;
+  // @debug -------------------------;
+
+  @if $values {
+    // Loop through each key in the map
+    @each $key in map.keys($fluid-map) {
+      $map: map.get($fluid-map, $key);
+
+      // @debug map $map;
+
+      $selector-suffix: $key;
+
+      // @debug selector-suffix $selector-suffix;
+      $custom-property-name: $key;
+
+      // @debug remove-prefix remove-prefix($key, 'fs-');
+
+      $use-custom-property: if(map.has-key($map, create-custom-property), map.get($map, create-custom-property), true);
+
+      // @debug use $use-custom-property;
+      // @debug custom-property-name $custom-property-name;
+      // @debug use-custom-property $use-custom-property;
+
+      $threshold-map: map.get($map, threshold);
+
+      // Get keys (the viewports)
+      $viewports: map.keys($threshold-map);
+      $min-viewport: list.nth($viewports, 1);
+      $max-viewport: list.nth($viewports, 2);
+
+      // @debug min-viewport $min-viewport;
+      // @debug max-viewport $max-viewport;
+
+      // Get sizes
+      $min-size: map.get($threshold-map, $min-viewport);
+      $max-size: map.get($threshold-map, $max-viewport);
+
+      // @debug min-size $min-size;
+      // @debug max-size $max-size;
+
+      $threshold-unit: if(
+        map.has-key($map, threshold-unit),
+        map.get($map, threshold-unit),
+        if(#{$property} == 'font-size', 'rem', 'px')
+      );
+      $preferred-unit: if(map.has-key($map, preferred-unit), map.get($map, preferred-unit), 'rem');
+      $relative-to: if(map.has-key($map, relative-to), map.get($map, relative-to), 'viewport');
+
+      // @debug min-vp $min-viewport;
+      // @debug max-vp $max-viewport;
+      // @debug min-size $min-size;
+      // @debug max-size $max-size;
+      // @debug threshold-unit $threshold-unit;
+      // @debug preferred-unit $preferred-unit;
+      // @debug relative-to $relative-to;
+
+      $breakpoint-prefix: breakpoint-prefix($breakpoint);
+
+      @if $use-custom-property {
+        // @debug inside;
+        .#{$breakpoint}#{$class}-#{$selector-suffix} {
+          @each $prop in $property {
+            #{$prop}: var(--#{$cp-namespace}#{$custom-property-name}) #{$important};
+          }
+        }
+      } @else {
+        .#{$breakpoint}#{$class}-#{$selector-suffix} {
+          @each $prop in $property {
+            #{$prop}: fluid($min-size, $max-size, $min-viewport, $max-viewport, $threshold-unit, $preferred-unit, $relative-to)
+              #{$important};
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin apply-custom-prop-utility($map) {
+  $property: map.get($map, property);
+  $values: map.get($map, values);
+  $custom-property-trunks: if($values, map.keys($values), 'null');
+  $custom-property-prefix: map.get($map, custom-property-prefix);
+  $required-property: map.get($map, required-property);
+  $formatted-prefix: add-hyphen($custom-property-prefix);
+  $important: map.get($map, important);
+  $breakpoint: map.get($map, breakpoint);
+  $class: map.get($map, class);
+  $local-vars: map.get($map, local-vars);
+  $state: if(map.get($map, state), to-list(map.get($map, state)), null);
+
+  // @debug property $property;
+  // @debug values $values;
+  // @debug required-property $required-property;
+  // @debug prefix $custom-property-prefix;
+  // @debug formatted-prefix $formatted-prefix;
+
+  // @debug trunks $custom-property-trunks;
+
+  // @debug important $important;
+  // @debug breakpoint $breakpoint;
+  // @debug class $class;
+  // @debug state $state;
+
+  // @debug breakpoint $breakpoint;
+  // @debug local-vars $local-vars;
+
+  @if $values {
+    @if $formatted-prefix {
+      @each $trunk in $custom-property-trunks {
+        .#{$breakpoint}#{$class}-#{$trunk}#{$state} {
+          @if $required-property {
+            @each $prop, $value in $required-property {
+              #{$prop}: $value #{$important};
+            }
+          }
+
+          @each $prop in $property {
+            #{$prop}: var(--#{$cp-namespace}#{$formatted-prefix}#{$trunk}) #{$important};
+          }
+        }
+      }
+    } @else {
+      @each $trunk, $value in $values {
+        $formatted-trunk: add-hyphen(#{$trunk}, prepend);
+        .#{$breakpoint}#{$class}#{$formatted-trunk}#{$state} {
+          @if $required-property {
+            @each $prop, $value in $required-property {
+              #{$prop}: $value #{$important};
+            }
+          }
+
+          @each $prop in $property {
+            #{$prop}: $value #{$important};
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin create-multi-prop-utility($map) {
+  $key: map.get($map, key);
+  $properties: map.get($map, properties);
+  $values: map.get($map, values);
+  $important: map.get($map, important);
+  $breakpoint: map.get($map, breakpoint);
+  $class: map.get($map, class);
+  $local-vars: map.get($map, local-vars);
+  $states: map.get($map, state);
+  $states-length: if($states, list.length($states), null);
+  $states: if($states-length == 1, to-list($states), $states);
+
+  // @debug key $key;
+  // @debug properties $properties;
+  // @debug important $important;
+  // @debug breakpoint $breakpoint;
+  // @debug class $class;
+  // @debug state $states;
+  // @debug state-length $states-length;
+  // @debug meta-state meta.type-of($states);
+  // @debug local-vars $local-vars;
+  // @debug join list.join($states, (), comma);
+  // @debug states $states;
+  // @debug length $states-length;
+
+  @if $states and $states-length > 1 {
+    $formatted-states: list.join($states, (), comma);
+
+    // @debug $formatted-states;
+
+    .#{$breakpoint}#{$class}:where(#{$formatted-states}) {
+      @if $local-vars {
+        @each $local-var, $value in $local-vars {
+          --#{$local-var}: #{$value};
+        }
+      }
+
+      @each $prop, $value in $properties {
+        #{$prop}: $value #{$important};
+      }
+    }
+  } @else {
+    // Get single state from $states list, returns null if unset
+    $single-state: single-or-null($states);
+
+    .#{$breakpoint}#{$class}#{$single-state} {
+      @if $local-vars {
+        @each $local-var, $value in $local-vars {
+          --#{$local-var}: #{$value};
+        }
+      }
+
+      @each $prop, $value in $properties {
+        #{$prop}: $value #{$important};
+      }
+    }
+  }
+}
+
+@mixin apply-responsive-prop-utility($map) {
+  $property-bindings: map.get($map, property-bindings);
+  $important: map.get($map, important);
+  $breakpoint: map.get($map, breakpoint);
+  $breakpoint-key: map.get($map, breakpoint-key);
+  $class: map.get($map, class);
+  $key: map.get($map, key);
+
+  // @debug responsive-custom-props $responsive-custom-props;
+  // @debug important $important;
+  // @debug breakpoint $breakpoint;
+  // @debug breakpoint-key $breakpoint-key;
+  // @debug class $class;
+
+  $breakpoint-key: if($breakpoint-key == '', $breakpoint-key, $breakpoint-key + '-');
+
+  .#{$breakpoint}#{$class} {
+    @each $prop, $value in $property-bindings {
+      #{$prop}: var(--#{$breakpoint-key}#{$value}) #{$important};
+    }
+  }
+}
+
+@mixin create-nested-pattern($map) {
+  $nesting: map.get($map, nesting);
+  $values: map.get($map, values);
+  $important: map.get($map, important);
+  $breakpoint: map.get($map, breakpoint);
+  $class: map.get($map, class);
+  $custom-properties: map.get($map, custom-properties);
+
+  // @debug nesting $nesting;
+  // @debug important $important;
+  // @debug breakpoint $breakpoint;
+  // @debug class $class;
+  // @debug values $values;
+
+  // @debug meta.type-of($values);
+
+  @if $values and meta.type-of($values) == map {
+    @each $key, $value in $values {
+      .#{$breakpoint}#{$class}-#{$key} {
+        // loop through custom properties
+
+        @if $custom-properties and meta.type-of($custom-properties) == map {
+          @each $name, $value in $custom-properties {
+            --#{$name}: $value;
+          }
+        }
+
+        @each $property, $property-value in $nesting {
+          // @debug property $property;
+          // @debug property-value $value;
+
+          @if meta.type-of($property-value) == 'map' {
+            $_nested-selector: $property;
+
+            #{$_nested-selector} {
+              @each $nested-property, $nested-value in $property-value {
+                $formatted-value: null;
+
+                @if $nested-value == '' {
+                  $formatted-value: '""';
+                } @else if $nested-value == VALUE {
+                  $formatted-value: $value;
+                } @else {
+                  $formatted-value: $nested-value;
+                }
+
+                #{$nested-property}: #{$formatted-value};
+              }
+            }
+          } @else {
+            #{$property}: #{$value};
+          }
+        }
+      }
+    }
+  } @else {
+    .#{$breakpoint}#{$class} {
+      // loop through custom properties
+      @if $custom-properties and meta.type-of($custom-properties) == map {
+        @each $name, $value in $custom-properties {
+          --#{$name}: $value;
+        }
+      }
+
+      // Loop through the nesting defined for each utility
+      @each $property, $property-value in $nesting {
+        @if meta.type-of($property-value) == 'map' {
+          $_nested-selector: $property;
+
+          #{$_nested-selector} {
+            @each $nested-property, $nested-value in $property-value {
+              $formatted-value: if($nested-value == '', '""', $nested-value);
+
+              #{$nested-property}: #{$formatted-value} #{$important};
+            }
+          }
+        } @else {
+          #{$property}: #{$property-value} #{$important};
+        }
+      }
+    }
+  }
+}
+
+@mixin set-custom-prop-utility($map) {
+  $property: map.get($map, property);
+  $key: map.get($map, key);
+  $values: map.get($map, values);
+  $important: map.get($map, important);
+  $breakpoint: map.get($map, breakpoint);
+  $class: if(map.get($map, class), map.get($map, class), $key);
+  $local-vars: map.get($map, local-vars);
+  $states: map.get($map, state);
+  $states-length: if($states, list.length($states), null);
+  $states: if($states-length == 1, to-list($states), $states);
+  $css-variable-name: map.get($map, css-variable-name);
+  $custom-property-trunks: if($values, map.keys($values), 'null');
+  $custom-property-prefix: map.get($map, custom-property-prefix);
+
+  // @debug --------------------------;
+  // @debug property $property;
+  // @debug custom-property-trunks $custom-property-trunks;
+  // @debug custom-property-prefix $custom-property-prefix;
+  // @debug values $values;
+  // @debug inportant $important;
+  // @debug breakpoint $breakpoint;
+  // @debug key $key;
+  // @debug class $class;
+  // @debug state $states;
+  // @debug meta-state meta.type-of($states);
+  // @debug state-length $states-length;
+  // @debug local-vars $local-vars;
+  // @debug css-variable-name $css-variable-name;
+  // @debug --------------------------;
+
+  @if $values {
+    @if $states and $states-length > 1 {
+      // @debug more than one state;
+      @each $state in $states {
+        @each $key, $value in $values {
+          $key-suffix: null-safe-suffix($key);
+
+          // @debug key-suffix $key-suffix;
+
+          @if $custom-property-prefix {
+            .#{$class}#{$breakpoint}#{$key-suffix}#{$state} {
+              --#{$css-variable-name}: var(--#{$cp-namespace}#{$custom-property-prefix}#{$key-suffix});
+            }
+          } @else {
+            .#{$class}#{$breakpoint}#{$key-suffix}#{$state} {
+              --#{$css-variable-name}: #{$value};
+            }
+          }
+        }
+      }
+    } @else {
+      @each $key, $value in $values {
+        $key-suffix: null-safe-suffix($key);
+
+        // @debug key $key;
+        // @debug key-suffix $key-suffix;
+        $single-state: single-or-null($states);
+
+        // @debug $single-state;
+        @if $custom-property-prefix {
+          .#{$class}#{$breakpoint}#{$key-suffix}#{$single-state} {
+            --#{$css-variable-name}: var(--#{$cp-namespace}#{$custom-property-prefix}#{$key}#{$single-state});
+          }
+        } @else {
+          // @debug single-state $single-state;
+          .#{$class}#{$breakpoint}#{$key-suffix}#{$single-state} {
+            --#{$css-variable-name}: #{$value};
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin apply-custom-props-at-breakpoints-utility($map) {
+  // @debug map $map;
+  // @debug keys map.keys($map);
+  // @debug HEER $map;
+
+  $map: map.get($map, values);
+
+  @if $map {
+    @if list.length(map.keys($map)) > 0 {
+      @each $key, $value-map in $map {
+        $_class: if(map.has-key($value-map, class), map.get($value-map, class), $key);
+        $_property: map.get($value-map, property);
+
+        @if $_property {
+          .#{$_class} {
+            #{$_property}: var(--#{$cp-namespace}#{$key});
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin generate-responsive-custom-properties($map) {
+  // @debug map $map;
+  // @debug bps map.keys($map);
+
+  @each $breakpoint in map.keys($map) {
+    // @debug bp $breakpoint;
+
+    @include media-breakpoint-up($breakpoint) {
+      // @debug inside media-bp-up $breakpoint;
+
+      @if $breakpoint == 'xs' {
+        // @debug map map.get($map, $breakpoint);
+        @each $custom-property-name, $value-object in map.get($map, $breakpoint) {
+          // @debug custom-property-name $custom-property-name;
+          // @debug value-object $value-object;
+          // @debug ----------;
+          --#{$cp-namespace}#{$custom-property-name}: #{map.get($value-object, value)};
+        }
+      } @else {
+        @each $custom-property-name, $value in map.get($map, $breakpoint) {
+          // @debug in else;
+          // @debug custom-property-name $custom-property-name;
+          // @debug value $value;
+
+          // @debug ----------;
+
+          & {
+            --#{$cp-namespace}#{$custom-property-name}: #{$value};
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin generate-custom-properties($map: (), $local-namespace: '') {
+  @if $map {
+    @if map.has-key($map, custom-property-name) {
+      $_name: map.get($map, custom-property-name);
+      $_map: map.get($map, values);
+
+      // @debug map 1 $_map;
+
+      // convert to a map if $_map is a list
+      $_map: if(meta.type-of($_map) == list, list.zip($_map, $_map), $_map);
+
+      // @debug _name $_name;
+      // @debug _map 2 $_map;
+
+      @if $_map {
+        @each $key, $value in $_map {
+          // @debug key $key;
+          // @debug value $value;
+
+          @if $key != 'none' {
+            $_key: if($key, if($key == 0, '-0', -$key), '');
+
+            --#{$cp-namespace}#{$local-namespace}#{$_name}#{$_key}: #{$value};
+          }
+        }
+      }
+    } @else if map.has-key($map, xs) {
+      @each $key, $value in $map {
+        @if $key != xs {
+          --#{$cp-namespace}#{$local-namespace}#{$key}: #{$value};
+        }
+      }
+    }
+  }
+}
+
+@mixin generate-simple-custom-properties($map: ()) {
+  @if $map {
+    @if list.length(map.keys($map)) > 0 {
+      @each $key, $value in $map {
+        @if meta.type-of($value) == map {
+          --#{$cp-namespace}#{$key}: #{map.get($value, value)};
+        } @else {
+          --#{$cp-namespace}#{$key}: #{$value};
+        }
+      }
+    }
+  }
+}
+
+@mixin generate-clamp-custom-properties($clamp-map, $default-unit: 'rem', $default-relative-to: 'viewport') {
+  // Only loop if the map has entries
+  @if $clamp-map and list.length(map.keys($clamp-map)) > 0 {
+    @each $key, $map in $clamp-map {
+      $has-custom-property: if(map.has-key($map, create-custom-property), map.get($map, create-custom-property), true);
+
+      @if $has-custom-property {
+        $relative-to: if(map.has-key($map, relative-to), map.get($map, relative-to), $default-relative-to);
+        $threshold-unit: if(map.has-key($map, threshold-unit), map.get($map, threshold-unit), $default-unit);
+        $threshold-keys: map.keys(map.get($map, threshold));
+        $threshold-map: map.get($map, threshold);
+        $min-size: map.get($threshold-map, list.nth($threshold-keys, 1));
+        $max-size: map.get($threshold-map, list.nth($threshold-keys, 2));
+
+        // convert the keys to its corresponding pixel value. Otherwise, use the value as-is.
+        $key-min-formatted: if(
+          meta.type-of(list.nth($threshold-keys, 1)) == 'string' and map.has-key($grid-breakpoints, list.nth($threshold-keys, 1)),
+          map.get($grid-breakpoints, list.nth($threshold-keys, 1)),
+          list.nth($threshold-keys, 1)
+        );
+        $key-max-formatted: if(
+          meta.type-of(list.nth($threshold-keys, 2)) == 'string' and map.has-key($grid-breakpoints, list.nth($threshold-keys, 2)),
+          map.get($grid-breakpoints, list.nth($threshold-keys, 2)),
+          list.nth($threshold-keys, 2)
+        );
+        $min-viewport: remove-unit-and-convert($key-min-formatted);
+        $max-viewport: remove-unit-and-convert($key-max-formatted);
+        $delta-size: $max-size - $min-size;
+        $delta-viewport: $max-viewport - $min-viewport;
+        $change: round-to(math.div($delta-size, $delta-viewport), 6);
+        $preferred: round-to(math.div($max-size - ($max-viewport * $change), 16) * 1rem, 4);
+        $rate-of-change: null;
+
+        @if $relative-to == 'viewport' {
+          $rate-of-change: round-to(100vw * $change);
+        } @else if $relative-to == 'container' {
+          $rate-of-change: round-to(100cqi * $change);
+        } @else {
+          @error 'Invalid value for $relativeTo. Expected "viewport" or "container".';
+        }
+
+        $min-size: if($threshold-unit == 'rem', px-to-rem($min-size), $min-size * 1px);
+        $max-size: if($threshold-unit == 'rem', px-to-rem($max-size), $max-size * 1px);
+
+        --#{$cp-namespace}#{$key}: clamp(#{$min-size}, calc(#{$preferred} + #{$rate-of-change}), #{$max-size});
+      }
+    }
+  }
+}
+
+@mixin generate-color-themes($color-theme, $removed-theme: 'default') {
+  // @debug color-theme $color-theme;
+  // @debug meta.type-of($color-theme);
+
+  $_theme-map: map.remove($color-theme, $removed-theme);
+
+  // @debug _theme-map $_theme-map;
+  // @debug meta meta.type-of($_theme-map);
+
+  @each $theme, $color-map, $color-hover in $_theme-map {
+    $colors: map.get($color-map, color);
+    $colors-hover: if(map.get($color-map, hover), map.get($color-map, hover), ());
+
+    // @debug theme $theme;
+    // @debug color $colors;
+    // @debug color-hover $colors-hover;
+
+    [data-theme='#{$theme}'] {
+      $colors-rgb: map-loop($colors, to-rgb, '$value');
+
+      @include generate-color-custom-properties($colors, $color-prefix);
+      @include generate-color-custom-properties-rgb($colors-rgb, $color-prefix);
+      @include generate-color-custom-properties($colors-hover, $hover-prefix);
+    }
+  }
+}
+
+@mixin generate-color-custom-properties($color-theme, $color-prefix: 'clr-') {
+  // @debug meta.type-of($color-theme);
+
+  @each $color-name, $value in $color-theme {
+    @if meta.type-of($value) == 'color' {
+      --#{$cp-namespace}#{$color-prefix}#{$color-name}: #{$value};
+    } @else {
+      @error 'the color input is not correct';
+    }
+  }
+}
+
+@mixin generate-color-custom-properties-rgb($color-theme-map: (), $color-prefix: 'clr-') {
+  // Only loop if the map has entries
+
+  // @debug MAPP $color-theme-map;
+  @if $color-theme-map and list.length(map.keys($color-theme-map)) > 0 {
+    @each $color, $rgb-value in $color-theme-map {
+      $type: meta.type-of($rgb-value);
+
+      @if $type == 'list' {
+        // @debug color $color;
+        // @debug rgb $rgb-value;
+
+        --#{$cp-namespace}#{$color-prefix}#{$color}-rgb: #{$rgb-value};
+      } @else {
+        @error 'the color input is not correct';
+      }
+    }
+  }
+}
+
+@mixin export-breakpoints-json($grid-breakpoints, $prop-name: --js-breakpoints) {
+  $json: '{';
+  $i: 0;
+  $len: list.length($grid-breakpoints);
+  $last-item-index: $len - 1;
+
+  @each $key, $val in $grid-breakpoints {
+    // Zahl in px ohne Einheit schreiben
+    @if $key != xs {
+      @if math.is-unitless($val) {
+        @error 'your breakpoint: #{$key}:#{$val} is unitless!';
+      }
+
+      // @debug val $val;
+      // @debug meta.type-of($val);
+      $json: $json + '"' + $key + '":' + '"' + $val + '"';
+
+      @if $i != $last-item-index {
+        $json: $json + ',';
+      }
+    }
+
+    $i: $i + 1;
+  }
+
+  $json: $json + '}';
+
+  // $json: string.unquote($json);
+
+  #{$prop-name}: '#{$json}';
+}

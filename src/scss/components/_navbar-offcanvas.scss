@@ -1,0 +1,152 @@
+@use '../abstracts' as *;
+@use 'sass:map';
+
+.navbar {
+  --_offcanvas-width: 400px;
+  --_border: 1px solid black;
+  --_transition-duration: 300ms;
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__btn-close {
+    float: right;
+  }
+
+  &__btn-open,
+  &__btn-close {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+
+    &:focus-visible {
+      outline: 0;
+      box-shadow: var(--box-shadow-focus);
+    }
+  }
+
+  &__svg {
+    display: block;
+  }
+
+  &__offcanvas {
+    visibility: hidden;
+    padding: 1rem;
+    width: var(--_offcanvas-width);
+    max-width: 100%;
+    background-color: var(--clr-light);
+    background-clip: padding-box;
+    position: fixed;
+    bottom: 0;
+    z-index: var(--z-1);
+    display: flex;
+    row-gap: 16px;
+    flex-direction: column;
+
+    // offcanvas direction - default end
+    top: 0;
+    right: 0;
+    border-left: var(--_border);
+    transform: translateX(100%);
+
+    &.showing {
+      transition: transform var(--_transition-duration, 300ms) ease-in-out;
+    }
+
+    &.showing,
+    &.show {
+      visibility: visible;
+    }
+
+    &:focus {
+      outline: 0;
+    }
+  }
+
+  &__list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    display: flex;
+
+    // align-items: start;
+    flex-direction: column;
+  }
+
+  &__link {
+    padding-block: 8px;
+    display: block;
+    color: var(--clr-black);
+    text-decoration: none;
+
+    &:focus-visible {
+      outline: 0;
+      box-shadow: var(--box-shadow-focus);
+    }
+  }
+
+  // &__link.disabled {
+  //   color: rgba(0, 0, 0, 0.3);
+  //   pointer-events: none;
+  //   cursor: default;
+  // }
+
+  &__offcanvas-header {
+    text-align: end;
+  }
+
+  /* == offcanvas direction == */
+  &[data-direction='start'] {
+    top: 0;
+    left: 0;
+    border-right: var(--_border);
+    transform: translateX(-100%);
+  }
+
+  /* == modifiers == */
+
+  &--open &__offcanvas {
+    transform: none;
+  }
+
+  /* == expand == */
+  $grid-breakpoints-without-xs: map.remove($grid-breakpoints, 'xs');
+
+  @each $bp in map.keys($grid-breakpoints-without-xs) {
+    @include mq($bp) {
+      &--expand-#{$bp} {
+        --_gap: 16px;
+
+        .navbar__offcanvas {
+          all: unset;
+        }
+
+        .navbar__offcanvas-body {
+          display: flex;
+          align-items: center;
+          column-gap: var(--_gap);
+        }
+
+        .navbar__btn-open,
+        .navbar__btn-close {
+          display: none;
+        }
+
+        .navbar__list {
+          flex-direction: row;
+          column-gap: var(--_gap);
+          overflow-y: revert;
+          align-items: center;
+        }
+
+        .dropdown__list {
+          position: absolute;
+        }
+      }
+    }
+  }
+}

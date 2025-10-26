@@ -1,0 +1,23 @@
+@use "../abstracts" as *;
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid var(--clr-black);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: rotation 1s linear infinite paused;
+
+  &--play {
+    animation-play-state: running;
+  }
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

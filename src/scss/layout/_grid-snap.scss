@@ -1,0 +1,40 @@
+@use '../abstracts' as *;
+@use 'sass:map';
+
+.grid-snap {
+  --grid-flow: column;
+  --overflow-x: auto;
+  --snap-type: x mandatory;
+  --col-snap-width: min(45ch, 60vw);
+  --snap-align: center;
+  --snap-stop: always;
+
+  grid-auto-flow: var(--grid-flow);
+  overflow-x: var(--overflow-x);
+  scroll-snap-type: var(--snap-type);
+
+  & > * {
+    width: var(--col-snap-width);
+
+    /* Choose how to align children on scroll */
+    scroll-snap-align: var(--snap-align);
+
+    /* Prevents scrolling past more than one child */
+    scroll-snap-stop: var(--snap-stop);
+  }
+}
+
+@each $bp in map.keys($grid-breakpoints) {
+  $bp-prefix: breakpoint-prefix($bp, $grid-breakpoints);
+
+  @include mq($bp) {
+    .#{$bp-prefix}grid-snap-revert {
+      --flow: row;
+      --overflow-x: none;
+      --snap-type: none;
+      --col-snap-width: auto;
+      --snap-align: none;
+      --snap-stop: normal;
+    }
+  }
+}

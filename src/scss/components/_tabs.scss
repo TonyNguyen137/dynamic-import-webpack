@@ -1,0 +1,37 @@
+@use '../abstracts' as *;
+
+.tabs {
+  &__list {
+    display: flex;
+  }
+
+  &__tab {
+    border: none;
+    background-color: transparent;
+    flex: 1;
+    font-size: px-to-rem(24);
+    padding: 16px;
+  }
+
+  &__tab:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem lightblue;
+  }
+
+  &__tab[aria-selected='true'],
+  &__panel[aria-hidden='false'] {
+    outline: 1px solid lightskyblue;
+  }
+
+  &__panel[aria-hidden='true'] {
+    display: none;
+  }
+
+  &__panel {
+    padding: 16px 24px;
+  }
+
+  &__panel:focus {
+    box-shadow: 0 0 0 0.25rem lightblue;
+  }
+}

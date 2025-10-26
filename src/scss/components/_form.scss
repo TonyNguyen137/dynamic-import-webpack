@@ -1,0 +1,32 @@
+@use "../abstracts" as *;
+
+.form {
+  --focus-color: var(--clr-primary);
+
+  &__label {
+    margin-bottom: 8px;
+    display: inline-block;
+  }
+  &__control {
+    appearance: none;
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    background-color: var(--clr-white);
+    background-clip: padding-box;
+    border: 1px solid var(--clr-neutral);
+    border-radius: var(--rounded-base);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  &__select {
+    --form-select-bg-img: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3e%3cpath%20fill='none'%20stroke='%23343a40'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='2'%20d='m2%205%206%206%206-6'/%3e%3c/svg%3e");
+
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+    background-image: var(--form-select-bg-img);
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+  }
+}

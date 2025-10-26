@@ -1,0 +1,21 @@
+@use '../abstracts' as *;
+@use 'sass:map';
+
+.grid-res {
+  --default-col-size: 275px;
+
+  grid-template-columns: repeat(
+    var(--auto-mode, auto-fill),
+    minmax(min(var(--min-col-size, var(--default-col-size)), 100%), 1fr)
+  );
+}
+
+@each $bp in map.keys($grid-breakpoints) {
+  $bp-prefix: breakpoint-prefix($bp, $grid-breakpoints);
+
+  @include mq($bp) {
+    .#{$bp-prefix}grid-res {
+      grid-template-columns: repeat(var(--auto-mode, auto-fill), minmax(min(var(--#{$bp}-min-col-size), 100%), 1fr));
+    }
+  }
+}

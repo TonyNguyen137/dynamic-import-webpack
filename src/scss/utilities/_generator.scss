@@ -1,0 +1,64 @@
+/* 
+This file contains SCSS code sourced from the Bootstrap framework.
+Source: https://github.com/twbs/bootstrap/blob/main/scss/mixins/_utilities.scss
+The code used in accordance with Bootstrap's open-source license (MIT).
+Modifications may have been made to the original code.
+*/
+
+@use '../abstracts' as *;
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:list';
+
+// Loop over each breakpoint
+@each $breakpoint in map.keys($grid-breakpoints) {
+  // Generate media query if needed
+  @include media-breakpoint-up($breakpoint, $grid-breakpoints) {
+    $breakpoint-key: breakpoint-key($breakpoint, $grid-breakpoints);
+    $bp: breakpoint-prefix($breakpoint, $grid-breakpoints);
+
+    // Loop over each utility property
+    @each $key, $utility in $utilities {
+      // The utility can be disabled with `false`, thus check if the utility is a map first
+      // Only proceed if responsive media queries are enabled or if it's the base media query
+      @if meta.type-of($utility) == 'map' and (map.get($utility, responsive) or $bp == '') {
+        @include generate-utility($utility, $bp, $breakpoint-key, $key);
+      }
+    }
+  }
+}
+
+// loop over each container query sizes if available
+@if (
+  meta.variable-exists(container-query-sizes) and list.length(map.keys($container-query-sizes)) > 0
+) {
+  @each $breakpoint in map.keys($container-query-sizes) {
+    // Generate media query if needed
+    @include container-breakpoint-up($breakpoint, $container-query-sizes) {
+      $breakpoint-key: breakpoint-key($breakpoint, $container-query-sizes);
+      $bp: 'cq-' + breakpoint-prefix($breakpoint, $container-query-sizes);
+
+      // Loop over each utility property
+      @each $key, $utility in $utilities {
+        // The utility can be disabled with `false`, thus check if the utility is a map first
+        // Only proceed if responsive media queries are enabled or if it's the base media query
+        @if meta.type-of($utility) == 'map' and (map.get($utility, responsive) or $bp == '') {
+          @include generate-utility($utility, $bp, $breakpoint-key, $key);
+        }
+      }
+    }
+  }
+}
+
+@each $breakpoint in map.keys($grid-breakpoints) {
+  @include media-breakpoint-up($breakpoint, $grid-breakpoints) {
+    $breakpoint-key: breakpoint-key($breakpoint, $grid-breakpoints);
+    $bp: breakpoint-prefix($breakpoint, $grid-breakpoints);
+
+    @each $key, $pattern in $patterns {
+      @if meta.type-of($pattern) == 'map' and (map.get($pattern, responsive) or $bp == '') {
+        @include generate-pattern($pattern, $bp, $breakpoint-key, $key);
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+@use "../abstracts" as *;
+
+.banner {
+  position: relative;
+  padding-block: fluid(100, 250, sm, xl);
+
+  &__media {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+  &--overlay {
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.4),
+      rgba(0, 0, 0, 0.4)
+    );
+  }
+}

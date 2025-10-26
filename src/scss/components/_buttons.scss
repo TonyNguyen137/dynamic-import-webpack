@@ -1,0 +1,23 @@
+@use '../abstracts' as *;
+
+.btn-cta {
+  border-radius: var(--radius-base);
+  text-transform: uppercase;
+  text-decoration: none;
+  background-color: var(--clr-primary);
+  color: var(--clr-white);
+  padding-block: 6px;
+  padding-inline: 14px;
+  display: inline-flex;
+  align-items: center;
+  column-gap: 6px;
+
+  &::after {
+    content: '';
+    width: 11px;
+    height: 11px;
+    background-color: var(--clr-black);
+
+    // background-image: url('../assets/svg/arrow-right.svg');
+  }
+}
